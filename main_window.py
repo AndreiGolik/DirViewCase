@@ -75,16 +75,12 @@ class MainWindow(QMainWindow):
         self.filter.setGeometry(QRect(658, 0, 310, 22))
         self.filter.setPlaceholderText("Поиск")
 
-        self.resize(availableSize / 2)
-
         # Make it flickable on touchscreens
         QScroller.grabGesture(self.tree, QScroller.ScrollerGestureType.TouchGesture)
 
         self.setWindowTitle(self.name)
         self.setCentralWidget(self.tree)
         self.setFixedSize(950, 500)
-
-        self.expand_folder()
 
 
     def __update_tree(self):
@@ -95,7 +91,7 @@ class MainWindow(QMainWindow):
         else:
             if not self.flag_expand:
                 self.flag_expand = True
-                self.expand_folder()
+                self.tree.expandAll()
             self.proxy_model.setFilterRegex(text)
 
 
@@ -106,26 +102,6 @@ class MainWindow(QMainWindow):
         if source_index.isValid() and self.model.isDir(source_index) and self.model.data(source_index) == "Обновить":
             self.model.update_index(source_index)
             self.tree.viewport().update()
-
-    def expand_folder(self):
-        home_index = self.proxy_model.mapFromSource(self.model.index(self.home_path))
-        self.expand_level(home_index)
-
-    def expand_level(self, index):
-        if not index.isValid():
-            return
-
-        proxy_index = self.proxy_model.mapToSource(index)
-
-        if self.model.isDir(proxy_index):
-            if self.proxy_model.canFetchMore(proxy_index):
-                self.proxy_model.fetchMore(proxy_index)
-
-            self.tree.expand(index)
-
-            for row in range(self.proxy_model.rowCount(index)):
-                child_index = self.proxy_model.index(row, 0, index)
-                self.expand_level(child_index)
 
 
 
